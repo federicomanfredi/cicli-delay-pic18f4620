@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+<section class="container">
+    <h1>Cicli delay PIC18F4620</h1>
+</section>
+
+<section class="container pt-2">
+    <h2>Calcolo numero cicli istruzione</h2>
+    <form>
+        <div class="row">
+            <div class="col">
+                <label for="freq" class="form-label">Frequenza</label>
+                <input type="text" id="freq" class="form-control" placeholder="Frequenza">
+            </div>
+            <div class="col">
+                <label for="freq_div" class="form-label">Unità di misura</label>
+                <select id="freq_div" class="form-control">
+                    <option value="1">Hz</option>
+                    <option value="3">KHz</option>
+                    <option value="6">MHz</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="delay" class="form-label">Tempo delay</label>
+                <input type="text" id="delay" class="form-control" placeholder="Delay">
+            </div>
+            <div class="col">
+                <label for="time_div" class="form-label">Unità di misura</label>
+                <select id="time_div" class="form-control">
+                    <option value="-9">ns</option>
+                    <option value="-6">us</option>
+                    <option value="-3">ms</option>
+                    <option value="1">sec</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <span id="resultNumeroCicli"></span>
+</section>
+
+<section class="container pt-2">
+
+    <h2>Calcolo valori loop</h2>
+
+    <div class="js-form-loop">
+
+    </div>
+
+    <span id="resultCicliMancanti"></span>
+</section>
+
+
+<footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+
+    <script type="application/javascript">
+      /**
+       * Gestione calcolo numero cicli
+       */
+      const $freq = document.querySelector("#freq");
+      const $freq_div = document.querySelector("#freq_div");
+      const $delay = document.querySelector("#delay");
+      const $time_div = document.querySelector("#time_div");
+      const $result = document.querySelector("#resultNumeroCicli");
+
+      function calculateNumeroCicli() {
+        let periodo = 0;
+        if ($freq.value != "") {
+          periodo = 1 / ($freq.value * Math.pow(10, $freq_div.value));
+        }
+        let ciclo_istruzione = periodo * 4;
+        let numero_cicli = ($delay.value * Math.pow(10, $time_div.value)) / ciclo_istruzione;
+        numero_cicli = Math.round(numero_cicli).toFixed(1);
+
+        let $outputHtml = '<div>';
+        $outputHtml += '<p>Periodo: ' + periodo + '</p>';
+        $outputHtml += '<p>Ciclo istruzione: ' + ciclo_istruzione + '</p>';
+        $outputHtml += '<p>Numero cicli: ' + numero_cicli + '</p>';
+        $outputHtml += '</div>';
+
+        $result.innerHTML = $outputHtml;
+      }
+
+      $freq.addEventListener("keyup", calculateNumeroCicli);
+      $freq_div.addEventListener("change", calculateNumeroCicli);
+      $delay.addEventListener("keyup", calculateNumeroCicli);
+      $time_div.addEventListener("change", calculateNumeroCicli);
+
+      /**
+       * Gestione calcolo loop
+       */
+      const $formLoop = document.querySelector(".js-form-loop");
+      const $resultCicliMancanti = document.querySelector("#resultCicliMancanti");
+
+      let cicliLoop = [];
+      cicliLoop[0] = 0;
+      // inject first row
+      addRow();
+
+      function addRow() {
+        const loopNumber = document.querySelectorAll(".js-form-loop .row").length + 1;
+
+        let $divRowEl = document.createElement("div");
+        $divRowEl.classList.add("row");
+
+        let $divColEl1 = document.createElement("div");
+        $divColEl1.classList.add("col");
+        $divRowEl.appendChild($divColEl1);
+
+        let $divColEl2 = document.createElement("div");
+        $divColEl2.classList.add("col");
+        $divRowEl.appendChild($divColEl2);
+
+        let $divColEl3 = document.createElement("div");
+        $divColEl3.classList.add("col");
+        $divRowEl.appendChild($divColEl3);
+
+        let $pLoopNumberEl = document.createElement("p");
+        $pLoopNumberEl.innerHTML = "Loop " + loopNumber + ":";
+        $divColEl1.appendChild($pLoopNumberEl);
+
+        let $labelCicliEl = document.createElement("label");
+        $labelCicliEl.for = "cicli";
+        $labelCicliEl.innerHTML = "Cicli";
+        $divColEl2.appendChild($labelCicliEl);
+
+        let $inputCicliEl = document.createElement("input");
+        $inputCicliEl.type = "number";
+        $inputCicliEl.classList.add("form-control", "cicli");
+        $inputCicliEl.placeholder = "Cicli";
+        // min value 0 and max value 255
+        $inputCicliEl.min = 0;
+        $inputCicliEl.max = 255;
+        $divColEl2.appendChild($inputCicliEl);
+
+        let $labelNopEl = document.createElement("label");
+        $labelNopEl.for = "nop";
+        $labelNopEl.innerHTML = "Nop";
+        $divColEl2.appendChild($labelNopEl);
+
+        let $inputNopEl = document.createElement("input");
+        $inputNopEl.type = "number";
+        $inputNopEl.classList.add("form-control", "nop");
+        $inputNopEl.placeholder = "Nop";
+        $divColEl2.appendChild($inputNopEl);
+
+        let $btnAddLoopEl = document.createElement("button");
+        $btnAddLoopEl.classList.add("btn", "btn-primary", "btn-sm", "js-add-loop");
+        $btnAddLoopEl.innerHTML = "Aggiungi ciclo";
+        $divColEl3.appendChild($btnAddLoopEl);
+
+        let $btnRemoveLoopEl = document.createElement("button");
+        $btnRemoveLoopEl.classList.add("btn", "btn-danger", "btn-sm", "js-remove-loop");
+        $btnRemoveLoopEl.innerHTML = "Rimuovi ciclo";
+        // disabled remove button on first row
+        if (loopNumber === 1) {
+          $btnRemoveLoopEl.disabled = true;
+        }
+        $divColEl3.appendChild($btnRemoveLoopEl);
+
+        $formLoop.appendChild($divRowEl);
+
+        $inputCicliEl.addEventListener("keyup", () => calculateLoop(loopNumber, $inputCicliEl, $inputNopEl));
+        $inputNopEl.addEventListener("keyup", () => calculateLoop(loopNumber, $inputCicliEl, $inputNopEl));
+
+        $btnAddLoopEl.addEventListener("click", addRow);
+        $btnRemoveLoopEl.addEventListener("click", () => removeRow($divRowEl));
+      }
+
+      function removeRow($divRowEl) {
+        $divRowEl.remove();
+        // update loop number on all rows
+        const $rows = document.querySelectorAll(".js-form-loop .row");
+        $rows.forEach(($row, index) => {
+          $row.querySelector("p").innerHTML = "Loop " + (index + 1) + ":";
+        });
+      }
+
+      function calculateLoop(loopNumber, $cicli, $nop) {
+        // get value from input, if empty set to 0
+        let numero_cicli = $cicli.value === "" ? 0 : parseInt($cicli.value);
+        let nop_aggiuntivi = $nop.value === "" ? 0 : parseInt($nop.value);
+
+        let numero_cicli_loop_precedente = parseInt(cicliLoop[loopNumber - 1]);
+
+        let cicliTotali = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
+
+        cicliLoop[loopNumber] = cicliTotali;
+
+        // update cicliLoop array
+        for (let i = loopNumber + 1; i < cicliLoop.length; i++) {
+          cicliLoop[i] = 0;
+
+          let numero_cicli_loop_precedente = parseInt(cicliLoop[i - 1]);
+
+          cicliLoop[i] = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
+        }
+
+        // print all loops
+        let $outputHtml = '<div>';
+        for (let i = 1; i < cicliLoop.length; i++) {
+          $outputHtml += '<p>Loop ' + i + ': ' + cicliLoop[i] + '</p>';
+        }
+        $outputHtml += '</div>';
+
+        $resultCicliMancanti.innerHTML = $outputHtml;
+      }
+
+    </script>
+</footer>
+</body>
+</html>
