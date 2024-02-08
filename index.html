@@ -12,7 +12,7 @@
     <h1>Cicli delay PIC18F4620</h1>
 </section>
 
-<section class="container pt-2">
+<section class="container card p-2">
     <h2>Calcolo numero cicli istruzione</h2>
     <form>
         <div class="row">
@@ -47,10 +47,16 @@
         </div>
     </form>
 
-    <span id="resultNumeroCicli"></span>
+    <div id="resultNumeroCicli">
+        <div class="row">
+            <p>Periodo: <span class="js-resultNumeroCicli-periodo">0</span>s</p>
+            <p>Ciclo istruzione: <span class="js-resultNumeroCicli-CI">0</span>s</p>
+            <p>Numero cicli: <span class="js-resultNumeroCicli-cicli">0</span></p>
+        </div>
+    </div>
 </section>
 
-<section class="container pt-2">
+<section class="container card p-2 mt-2">
 
     <h2>Calcolo valori loop</h2>
 
@@ -58,7 +64,16 @@
 
     </div>
 
-    <span id="resultCicliMancanti"></span>
+    <div class="row">
+        <div class="col">
+            <span id="resultCicliMancanti"></span>
+        </div>
+        <div class="col">
+            <span id="resultAssembly"></span>
+        </div>
+    </div>
+
+
 </section>
 
 
@@ -87,13 +102,40 @@
         let numero_cicli = ($delay.value * Math.pow(10, $time_div.value)) / ciclo_istruzione;
         numero_cicli = Math.round(numero_cicli).toFixed(1);
 
-        let $outputHtml = '<div>';
-        $outputHtml += '<p>Periodo: ' + periodo + '</p>';
-        $outputHtml += '<p>Ciclo istruzione: ' + ciclo_istruzione + '</p>';
-        $outputHtml += '<p>Numero cicli: ' + numero_cicli + '</p>';
-        $outputHtml += '</div>';
+        document.querySelector(".js-resultNumeroCicli-periodo").innerHTML = convertNumberWithMultiplesSubmultiples(periodo);
+        document.querySelector(".js-resultNumeroCicli-CI").innerHTML = convertNumberWithMultiplesSubmultiples(ciclo_istruzione);
+        document.querySelector(".js-resultNumeroCicli-cicli").innerHTML = numero_cicli;
+      }
 
-        $result.innerHTML = $outputHtml;
+      function convertNumberWithMultiplesSubmultiples(number) {
+        let multiplesSubmultiples = {
+          1: " ",
+          3: "K",
+          6: "M",
+          9: "G",
+          12: "T",
+          15: "P",
+          18: "E",
+          21: "Z",
+          24: "Y",
+          '-3': "m",
+          '-6': "u",
+          '-9': "n",
+          '-12': "p",
+          '-15': "f",
+          '-18': "a",
+          '-21': "z",
+          '-24': "y",
+        };
+        // check which multiple or submultiple to use
+        let multipleSubmultiple = 0;
+        if (number >= 1) {
+          multipleSubmultiple = Math.floor(Math.log10(number) / 3) * 3;
+        } else {
+          multipleSubmultiple = Math.ceil(Math.log10(number) / 3) * 3;
+        }
+        // return value with multiple or submultiple
+        return number * Math.pow(10, -multipleSubmultiple) + multiplesSubmultiples[multipleSubmultiple];
       }
 
       $freq.addEventListener("keyup", calculateNumeroCicli);
@@ -106,6 +148,7 @@
        */
       const $formLoop = document.querySelector(".js-form-loop");
       const $resultCicliMancanti = document.querySelector("#resultCicliMancanti");
+      const $resultAssembly = document.querySelector("#resultAssembly");
 
       let cicliLoop = [];
       cicliLoop[0] = 0;
@@ -175,8 +218,8 @@
 
         $formLoop.appendChild($divRowEl);
 
-        $inputCicliEl.addEventListener("keyup", () => calculateLoop(loopNumber, $inputCicliEl, $inputNopEl));
-        $inputNopEl.addEventListener("keyup", () => calculateLoop(loopNumber, $inputCicliEl, $inputNopEl));
+        $inputCicliEl.addEventListener("keyup", () => updateLoopResult());
+        $inputNopEl.addEventListener("keyup", () => updateLoopResult());
 
         $btnAddLoopEl.addEventListener("click", addRow);
         $btnRemoveLoopEl.addEventListener("click", () => removeRow($divRowEl));
@@ -202,23 +245,38 @@
 
         cicliLoop[loopNumber] = cicliTotali;
 
-        // update cicliLoop array
-        for (let i = loopNumber + 1; i < cicliLoop.length; i++) {
-          cicliLoop[i] = 0;
-
-          let numero_cicli_loop_precedente = parseInt(cicliLoop[i - 1]);
-
-          cicliLoop[i] = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
-        }
-
         // print all loops
-        let $outputHtml = '<div>';
-        for (let i = 1; i < cicliLoop.length; i++) {
-          $outputHtml += '<p>Loop ' + i + ': ' + cicliLoop[i] + '</p>';
-        }
-        $outputHtml += '</div>';
+        outputLoopResult();
+      }
 
-        $resultCicliMancanti.innerHTML = $outputHtml;
+      function outputLoopResult() {
+        let $outputHtmlCicliMancanti = '<div>';
+        for (let i = 1; i < cicliLoop.length; i++) {
+          $outputHtmlCicliMancanti += '<p>Loop ' + i + ': ' + cicliLoop[i] + '</p>';
+        }
+        $outputHtmlCicliMancanti += '</div>';
+
+        $resultCicliMancanti.innerHTML = $outputHtmlCicliMancanti;
+
+        // print codice assembly
+        let $outputHtmlAssembly = '<code>';
+        $outputHtmlAssembly += 'Delay:';
+        for (let i = 1; i < cicliLoop.length; i++) {
+          $outputHtmlAssembly += '</br>MOVLW ' + cicliLoop[i];
+          $outputHtmlAssembly += '</br>MOVWF ' + 'PORTB';
+        }
+        $outputHtmlAssembly += '</code>';
+
+        $resultAssembly.innerHTML = $outputHtmlAssembly;
+      }
+
+      function updateLoopResult() {
+        const $rows = document.querySelectorAll(".js-form-loop .row");
+        $rows.forEach(($row, index) => {
+          const $cicli = $row.querySelector(".cicli");
+          const $nop = $row.querySelector(".nop");
+          calculateLoop(index + 1, $cicli, $nop);
+        });
       }
 
     </script>
