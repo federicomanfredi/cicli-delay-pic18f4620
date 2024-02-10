@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Delay PIC18F4620</title>
+    <!-- Link to Bootstrap CSS library -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
@@ -15,6 +16,7 @@
 <section class="container card p-2">
     <h2>Calcolo numero cicli istruzione</h2>
     <form>
+        <!-- Form for frequency and unit of measure -->
         <div class="row">
             <div class="col">
                 <label for="freq" class="form-label">Frequenza</label>
@@ -30,6 +32,7 @@
             </div>
         </div>
 
+        <!-- Form for delay time and unit of measure -->
         <div class="row">
             <div class="col">
                 <label for="delay" class="form-label">Tempo delay</label>
@@ -47,6 +50,7 @@
         </div>
     </form>
 
+    <!-- Result display area -->
     <div id="resultNumeroCicli">
         <div class="row">
             <p>Periodo: <span class="js-resultNumeroCicli-periodo">0</span>s</p>
@@ -60,10 +64,12 @@
 
     <h2>Calcolo valori loop</h2>
 
+    <!-- Form for loop calculation -->
     <div class="js-form-loop">
 
     </div>
 
+    <!-- Result display area -->
     <div class="row">
         <div class="col">
             <span id="resultCicliMancanti"></span>
@@ -79,13 +85,18 @@
 
 <footer>
 
+    <!-- Link to Bootstrap JS library -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"></script>
 
     <script type="application/javascript">
       /**
-       * Gestione calcolo numero cicli
+       * This script handles the calculation of the number of cycles and loop values.
+       */
+
+      /**
+       * Handles the calculation of the number of cycles.
        */
       const $freq = document.querySelector("#freq");
       const $freq_div = document.querySelector("#freq_div");
@@ -93,6 +104,9 @@
       const $time_div = document.querySelector("#time_div");
       const $result = document.querySelector("#resultNumeroCicli");
 
+      /**
+       * Calculates the number of cycles based on the frequency and delay time.
+       */
       function calculateNumeroCicli() {
         let periodo = 0;
         if ($freq.value != "") {
@@ -102,14 +116,21 @@
         let numero_cicli = ($delay.value * Math.pow(10, $time_div.value)) / ciclo_istruzione;
         numero_cicli = Math.round(numero_cicli).toFixed(1);
 
+        console.log(periodo, ciclo_istruzione, numero_cicli)
+
         document.querySelector(".js-resultNumeroCicli-periodo").innerHTML = convertNumberWithMultiplesSubmultiples(periodo);
         document.querySelector(".js-resultNumeroCicli-CI").innerHTML = convertNumberWithMultiplesSubmultiples(ciclo_istruzione);
         document.querySelector(".js-resultNumeroCicli-cicli").innerHTML = numero_cicli;
       }
 
+      /**
+       * Converts a number to its multiple or submultiple representation.
+       * @param {number} number - The number to convert.
+       * @returns {string} The converted number.
+       */
       function convertNumberWithMultiplesSubmultiples(number) {
         let multiplesSubmultiples = {
-          1: " ",
+          0: " ",
           3: "K",
           6: "M",
           9: "G",
@@ -138,13 +159,15 @@
         return number * Math.pow(10, -multipleSubmultiple) + multiplesSubmultiples[multipleSubmultiple];
       }
 
+      // Event listeners for the calculation of the number of cycles
       $freq.addEventListener("keyup", calculateNumeroCicli);
       $freq_div.addEventListener("change", calculateNumeroCicli);
       $delay.addEventListener("keyup", calculateNumeroCicli);
       $time_div.addEventListener("change", calculateNumeroCicli);
 
+
       /**
-       * Gestione calcolo loop
+       * Handles the calculation of loop values.
        */
       const $formLoop = document.querySelector(".js-form-loop");
       const $resultCicliMancanti = document.querySelector("#resultCicliMancanti");
@@ -155,6 +178,9 @@
       // inject first row
       addRow();
 
+      /**
+       * Adds a new row to the form for loop calculation.
+       */
       function addRow() {
         const loopNumber = document.querySelectorAll(".js-form-loop .row").length + 1;
 
@@ -225,6 +251,10 @@
         $btnRemoveLoopEl.addEventListener("click", () => removeRow($divRowEl));
       }
 
+      /**
+       * Removes a row from the form for loop calculation.
+       * @param {HTMLElement} $divRowEl - The row element to remove.
+       */
       function removeRow($divRowEl) {
         $divRowEl.remove();
         // update loop number on all rows
@@ -234,6 +264,12 @@
         });
       }
 
+      /**
+       * Calculates the loop values based on the number of cycles and additional NOPs.
+       * @param {number} loopNumber - The loop number.
+       * @param {HTMLElement} $cicli - The input element for the number of cycles.
+       * @param {HTMLElement} $nop - The input element for the number of additional NOPs.
+       */
       function calculateLoop(loopNumber, $cicli, $nop) {
         // get value from input, if empty set to 0
         let numero_cicli = $cicli.value === "" ? 0 : parseInt($cicli.value);
@@ -249,6 +285,9 @@
         outputLoopResult();
       }
 
+      /**
+       * Outputs the result of the loop calculation.
+       */
       function outputLoopResult() {
         let $outputHtmlCicliMancanti = '<div>';
         for (let i = 1; i < cicliLoop.length; i++) {
@@ -270,6 +309,9 @@
         $resultAssembly.innerHTML = $outputHtmlAssembly;
       }
 
+      /**
+       * Updates the result of the loop calculation.
+       */
       function updateLoopResult() {
         const $rows = document.querySelectorAll(".js-form-loop .row");
         $rows.forEach(($row, index) => {
