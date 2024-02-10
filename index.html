@@ -11,16 +11,19 @@
 <body>
 <section class="container">
     <h1>Cicli delay PIC18F4620</h1>
+    <!-- This section contains the title of the page -->
 </section>
 
 <section class="container card p-2">
     <h2>Calcolo numero cicli istruzione</h2>
+    <!-- This section contains the form for calculating the number of instruction cycles -->
     <form>
         <!-- Form for frequency and unit of measure -->
         <div class="row">
             <div class="col">
                 <label for="freq" class="form-label">Frequenza</label>
                 <input type="text" id="freq" class="form-control" placeholder="Frequenza">
+                <!-- Input field for frequency -->
             </div>
             <div class="col">
                 <label for="freq_div" class="form-label">Unità di misura</label>
@@ -29,6 +32,7 @@
                     <option value="3">KHz</option>
                     <option value="6">MHz</option>
                 </select>
+                <!-- Dropdown for frequency unit of measure -->
             </div>
         </div>
 
@@ -37,6 +41,7 @@
             <div class="col">
                 <label for="delay" class="form-label">Tempo delay</label>
                 <input type="text" id="delay" class="form-control" placeholder="Delay">
+                <!-- Input field for delay time -->
             </div>
             <div class="col">
                 <label for="time_div" class="form-label">Unità di misura</label>
@@ -46,6 +51,7 @@
                     <option value="-3">ms</option>
                     <option value="1">sec</option>
                 </select>
+                <!-- Dropdown for delay time unit of measure -->
             </div>
         </div>
     </form>
@@ -57,12 +63,14 @@
             <p>Ciclo istruzione: <span class="js-resultNumeroCicli-CI">0</span>s</p>
             <p>Numero cicli: <span class="js-resultNumeroCicli-cicli">0</span></p>
         </div>
+        <!-- Display area for the results of the calculation -->
     </div>
 </section>
 
 <section class="container card p-2 mt-2">
 
     <h2>Calcolo valori loop</h2>
+    <!-- This section contains the form for calculating loop values -->
 
     <!-- Form for loop calculation -->
     <div class="js-form-loop">
@@ -73,9 +81,11 @@
     <div class="row">
         <div class="col">
             <span id="resultCicliMancanti"></span>
+            <!-- Display area for the remaining cycles -->
         </div>
         <div class="col">
             <span id="resultAssembly"></span>
+            <!-- Display area for the assembly code -->
         </div>
     </div>
 
