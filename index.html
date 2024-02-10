@@ -112,22 +112,19 @@
       const $freq_div = document.querySelector("#freq_div");
       const $delay = document.querySelector("#delay");
       const $time_div = document.querySelector("#time_div");
-      const $result = document.querySelector("#resultNumeroCicli");
 
       /**
        * Calculates the number of cycles based on the frequency and delay time.
        */
       function calculateNumeroCicli() {
         let periodo = 0;
-        if ($freq.value != "") {
+        if ($freq.value !== "") {
           periodo = 1 / ($freq.value * Math.pow(10, $freq_div.value));
         }
         let ciclo_istruzione = periodo * 4;
         let numero_cicli = ($delay.value * Math.pow(10, $time_div.value)) / ciclo_istruzione;
         numero_cicli = Math.round(numero_cicli).toFixed(1);
-
-        console.log(periodo, ciclo_istruzione, numero_cicli)
-
+        
         document.querySelector(".js-resultNumeroCicli-periodo").innerHTML = convertNumberWithMultiplesSubmultiples(periodo);
         document.querySelector(".js-resultNumeroCicli-CI").innerHTML = convertNumberWithMultiplesSubmultiples(ciclo_istruzione);
         document.querySelector(".js-resultNumeroCicli-cicli").innerHTML = numero_cicli;
@@ -159,7 +156,7 @@
           '-24': "y",
         };
         // check which multiple or submultiple to use
-        let multipleSubmultiple = 0;
+        let multipleSubmultiple;
         if (number >= 1) {
           multipleSubmultiple = Math.floor(Math.log10(number) / 3) * 3;
         } else {
@@ -287,9 +284,7 @@
 
         let numero_cicli_loop_precedente = parseInt(cicliLoop[loopNumber - 1]);
 
-        let cicliTotali = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
-
-        cicliLoop[loopNumber] = cicliTotali;
+        cicliLoop[loopNumber] = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
 
         // print all loops
         outputLoopResult();
