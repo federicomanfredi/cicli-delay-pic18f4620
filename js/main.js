@@ -64,7 +64,7 @@ const initApp = () => {
     return number * Math.pow(10, -multipleSubmultiple) + multiplesSubmultiples[multipleSubmultiple];
   }
 
-// Event listeners for the calculation of the number of cycles
+  // Event listeners for the calculation of the number of cycles
   $freq.addEventListener("keyup", calculateNumeroCicli);
   $freq_div.addEventListener("change", calculateNumeroCicli);
   $delay.addEventListener("keyup", calculateNumeroCicli);
@@ -78,9 +78,9 @@ const initApp = () => {
   const $resultCicliMancanti = document.querySelector("#resultCicliMancanti");
   const $resultAssembly = document.querySelector("#resultAssembly");
 
-  let cicliLoop = [];
-  cicliLoop[0] = 0;
-// inject first row
+  let cicli = [];
+  cicli[0] = new Ciclo(0, 0);
+  // inject first row
   addRow();
 
   /**
@@ -180,9 +180,7 @@ const initApp = () => {
     let numero_cicli = $cicli.value === "" ? 0 : parseInt($cicli.value);
     let nop_aggiuntivi = $nop.value === "" ? 0 : parseInt($nop.value);
 
-    let numero_cicli_loop_precedente = parseInt(cicliLoop[loopNumber - 1]);
-
-    cicliLoop[loopNumber] = 2 + numero_cicli * (numero_cicli_loop_precedente + 3) + nop_aggiuntivi;
+    cicli[loopNumber] = new Ciclo(numero_cicli, nop_aggiuntivi, cicli[loopNumber - 1]);
 
     // print all loops
     outputLoopResult();
@@ -193,8 +191,8 @@ const initApp = () => {
    */
   function outputLoopResult() {
     let $outputHtmlCicliMancanti = '<div>';
-    for (let i = 1; i < cicliLoop.length; i++) {
-      $outputHtmlCicliMancanti += '<p>Loop ' + i + ': ' + cicliLoop[i] + '</p>';
+    for (let i = 1; i < cicli.length; i++) {
+      $outputHtmlCicliMancanti += '<p>Loop ' + i + ': ' + cicli[i].getNumeroCicli() + '</p>';
     }
     $outputHtmlCicliMancanti += '</div>';
 
@@ -202,10 +200,25 @@ const initApp = () => {
 
     // print codice assembly
     let $outputHtmlAssembly = '<code>';
-    $outputHtmlAssembly += 'Delay:';
-    for (let i = 1; i < cicliLoop.length; i++) {
-      $outputHtmlAssembly += '</br>MOVLW ' + cicliLoop[i];
-      $outputHtmlAssembly += '</br>MOVWF ' + 'PORTB';
+    $outputHtmlAssembly += '; Dichiarazione variabili';
+    $outputHtmlAssembly += '</br>PSECT udata_acs';
+    for (let i = 1; i < cicli.length; i++) {
+      $outputHtmlAssembly += '</br>&emsp;Delay' + i + ': DS 1';
+    }
+    $outputHtmlAssembly += '</br>';
+    $outputHtmlAssembly += '</br>'; // add empty line
+    $outputHtmlAssembly += '</br>; Codice assembly';
+    $outputHtmlAssembly += '</br>; Routine';
+    $outputHtmlAssembly += '</br>Delay:';
+    for (let i = 1; i < cicli.length; i++) {
+      $outputHtmlAssembly += '</br>&emsp;MOVLW ' + cicli[i].getNumeroCicliDecfsz();
+      $outputHtmlAssembly += '</br>&emsp;MOVWF ' + 'Delay' + i;
+      $outputHtmlAssembly += '</br>D_Loop' + i + ':';
+      $outputHtmlAssembly += '</br>&emsp;DECFSZ ' + 'Delay' + i + ', F';
+      $outputHtmlAssembly += '</br>&emsp;GOTO ' + 'D_Loop' + i;
+      for (let j = 0; j < cicli[i].getNopAggiuntivi(); j++) {
+        $outputHtmlAssembly += '</br>&emsp;NOP';
+      }
     }
     $outputHtmlAssembly += '</code>';
 
@@ -229,4 +242,32 @@ if (document.readyState === 'complete' || (document.readyState !== 'loading')) {
   initApp();
 } else {
   document.addEventListener('DOMContentLoaded', initApp);
+}
+
+class Ciclo {
+  /**
+   * @param {number} numero_cicli_decfsz
+   * @param {number} nop_aggiuntivi
+   * @param {Ciclo} ciclo_precedente
+   */
+  constructor(numero_cicli_decfsz, nop_aggiuntivi, ciclo_precedente = null) {
+    this.numero_cicli_decfsz = numero_cicli_decfsz;
+    this.nop_aggiuntivi = nop_aggiuntivi;
+    this.ciclo_precedente = ciclo_precedente;
+  }
+
+  getNumeroCicli() {
+    if (this.ciclo_precedente === null) {
+      return 0;
+    }
+    return 2 + this.numero_cicli_decfsz * (this.ciclo_precedente.getNumeroCicli() + 3) + this.nop_aggiuntivi;
+  }
+
+  getNumeroCicliDecfsz() {
+    return this.numero_cicli_decfsz;
+  }
+
+  getNopAggiuntivi() {
+    return this.nop_aggiuntivi;
+  }
 }
