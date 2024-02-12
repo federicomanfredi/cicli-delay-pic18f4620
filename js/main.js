@@ -210,16 +210,20 @@ const initApp = () => {
     $outputHtmlAssembly += '</br>; Codice assembly';
     $outputHtmlAssembly += '</br>; Routine';
     $outputHtmlAssembly += '</br>Delay:';
-    for (let i = 1; i < cicli.length; i++) {
+    for (let i = cicli.length - 1; i > 0; i--) {
       $outputHtmlAssembly += '</br>&emsp;MOVLW ' + cicli[i].getNumeroCicliDecfsz();
       $outputHtmlAssembly += '</br>&emsp;MOVWF ' + 'Delay' + i;
       $outputHtmlAssembly += '</br>D_Loop' + i + ':';
+    }
+    for (let i = 1; i < cicli.length; i++) {
       $outputHtmlAssembly += '</br>&emsp;DECFSZ ' + 'Delay' + i + ', F';
       $outputHtmlAssembly += '</br>&emsp;GOTO ' + 'D_Loop' + i;
       for (let j = 0; j < cicli[i].getNopAggiuntivi(); j++) {
         $outputHtmlAssembly += '</br>&emsp;NOP';
       }
     }
+    $outputHtmlAssembly += '</br>';
+    $outputHtmlAssembly += '</br>&emsp;RETURN';
     $outputHtmlAssembly += '</code>';
 
     $resultAssembly.innerHTML = $outputHtmlAssembly;
