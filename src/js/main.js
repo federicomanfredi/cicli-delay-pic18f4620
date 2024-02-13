@@ -199,7 +199,7 @@ const initApp = () => {
     $resultCicliMancanti.innerHTML = $outputHtmlCicliMancanti;
 
     // print codice assembly
-    let $outputHtmlAssembly = '<code>';
+    let $outputHtmlAssembly = '<pre><code>';
     $outputHtmlAssembly += '; Dichiarazione variabili';
     $outputHtmlAssembly += '</br>PSECT udata_acs';
     for (let i = 1; i < cicli.length; i++) {
@@ -224,7 +224,7 @@ const initApp = () => {
     }
     $outputHtmlAssembly += '</br>';
     $outputHtmlAssembly += '</br>&emsp;RETURN';
-    $outputHtmlAssembly += '</code>';
+    $outputHtmlAssembly += '</code></pre>';
 
     $resultAssembly.innerHTML = $outputHtmlAssembly;
   }
